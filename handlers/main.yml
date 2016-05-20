@@ -1,0 +1,4 @@
+- name: Start influxdb
+  service:
+    name: influxdb
+    state: started

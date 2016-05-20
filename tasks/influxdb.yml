@@ -1,0 +1,19 @@
+- name: Imports influxdb apt key
+  apt_key: 
+    url: https://repos.influxdata.com/influxdb.key
+    state: present
+
+- name: Adds influxdb repository
+  apt_repository:
+    repo: "deb https://repos.influxdata.com/{{ ansible_lsb.id | lower }} {{ ansible_lsb.codename }} stable"
+    state: present
+    update_cache: yes
+
+- name: Installs influxdb
+  apt:
+    pkg: influxdb
+    state: present
+  notify: ['Start influxdb']
+
+
+

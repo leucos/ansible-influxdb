@@ -1,0 +1,13 @@
+influxdb_reporting_disabled: "false"
+
+# Admin
+influxdb_admin_enabled: "true"
+influxdb_admin_https_enabled: "false"
+influxdb_admin_https_certificate: false
+influxdb_admin_port: 8083
+
+# HTTP
+influxdb_http_https_enabled: "false"
+influxdb_http_https_certificate: false
+influxdb_http_port: 8086
+
