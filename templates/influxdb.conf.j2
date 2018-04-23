@@ -98,10 +98,14 @@
   https-enabled = {{ influxdb_http_https_enabled }}
 
   # The SSL certificate to use when HTTPS is enabled.
+{% if influxdb_http_https_certificate %}
   https-certificate = "{{ influxdb_http_https_certificate }}"
+{% endif %}
 
   # Use a separate private key location.
+{% if influxdb_http_https_private_key %}
   https-private-key = "{{ influxdb_http_https_private_key }}"
+{% endif %}
 
   # The path of the unix domain socket.
   # bind-socket = "/var/run/influxdb.sock"
