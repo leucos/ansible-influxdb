@@ -46,10 +46,10 @@
 
 - name: Creates influxdb users
   influxdb_user:
-    user_name: "{{ item.key }}"
-    user_password: "{{ item.value }}"
+    user_name: "{{ item.username }}"
+    user_password: "{{ item.password }}"
     login_username: "{{ influxdb_admin_user }}"
     login_password: "{{ influxdb_admin_password }}"
     admin: yes
-  with_dict: "{{ influxdb_users }}"
+  with_items: "{{ influxdb_users }}"
   when: influxdb_users is defined
