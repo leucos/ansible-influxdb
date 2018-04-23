@@ -162,7 +162,7 @@ hostname = "{{ ansible_fqdn }}"
 [http]
   enabled = true
   bind-address = ":{{ influxdb_http_port }}"
-  auth-enabled = false
+  auth-enabled = {{ influxdb_http_auth_enabled }}
   log-enabled = true
   write-tracing = false
   pprof-enabled = false

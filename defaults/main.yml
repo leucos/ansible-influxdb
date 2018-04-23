@@ -10,4 +10,4 @@ influxdb_admin_port: 8083
 influxdb_http_https_enabled: "false"
 influxdb_http_https_certificate: false
 influxdb_http_port: 8086
-
+influxdb_http_auth_enabled: "false"
