@@ -13,7 +13,16 @@
   apt:
     pkg: influxdb
     state: present
-  notify: ['Start influxdb']
+  notify:
+    - Start influxdb
 
-
+- name: Adds influxdb configuration
+  template:
+    src: influxdb.conf.j2
+    dest: /etc/influxdb/influxdb.conf
+    mode: 0640
+    owner: influxdb
+    group: root
+  notify:
+    - Restart influxdb
 

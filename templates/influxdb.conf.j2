@@ -1,106 +1,27 @@
-### Welcome to the InfluxDB configuration file.
-
-# Once every 24 hours InfluxDB will report anonymous data to m.influxdb.com
-# The data includes raft id (random 8 bytes), os, arch, version, and metadata.
-# We don't track ip addresses of servers reporting. This is only used
-# to track the number of instances running and the versions, which
-# is very helpful for us.
-# Change this option to true to disable reporting.
-reporting-disabled = false
-
-# we'll try to get the hostname automatically, but if it the os returns something
-# that isn't resolvable by other servers in the cluster, use this option to
-# manually set the hostname
-hostname = "{{ ansible_fqdn }}"
-
-###
-### [meta]
-###
-### Controls the parameters for the Raft consensus group that stores metadata
-### about the InfluxDB cluster.
-###
-
 [meta]
-  # Where the metadata/raft database is stored
+  # We don't use raft
   dir = "/var/lib/influxdb/meta"
 
-  retention-autocreate = true
-
-  # If log messages are printed for the meta service
-  logging-enabled = true
-  pprof-enabled = false
-
-  # The default duration for leases.
-  lease-duration = "1m0s"
-
-###
-### [data]
-###
-### Controls where the actual shard data for InfluxDB lives and how it is
-### flushed from the WAL. "dir" may need to be changed to a suitable place
-### for your system, but the WAL settings are an advanced configuration. The
-### defaults should work for most systems.
-###
-
 [data]
-  # Controls if this node holds time series data shards in the cluster
-  enabled = true
+  # The directory where the TSM storage engine stores TSM files.
+  dir = "/data/influxdb/data"
 
-  dir = "/var/lib/influxdb/data"
+  # The directory where the TSM storage engine stores WAL files.
+  wal-dir = "/data/influxdb/snapshots"
 
-  # These are the WAL settings for the storage engine >= 0.9.3
-  wal-dir = "/var/lib/influxdb/wal"
-  wal-logging-enabled = true
-  data-logging-enabled = true
-
-  # Whether queries should be logged before execution. Very useful for troubleshooting, but will
-  # log any sensitive data contained within a query.
-  # query-log-enabled = true
-
-  # Settings for the TSM engine
-
-  # CacheMaxMemorySize is the maximum size a shard's cache can
-  # reach before it starts rejecting writes.
-  # cache-max-memory-size = 524288000
-
-  # CacheSnapshotMemorySize is the size at which the engine will
-  # snapshot the cache and write it to a TSM file, freeing up memory
-  # cache-snapshot-memory-size = 26214400
-
-  # CacheSnapshotWriteColdDuration is the length of time at
-  # which the engine will snapshot the cache and write it to
-  # a new TSM file if the shard hasn't received writes or deletes
-  # cache-snapshot-write-cold-duration = "1h"
-
-  # MinCompactionFileCount is the minimum number of TSM files
-  # that need to exist before a compaction cycle will run
-  # compact-min-file-count = 3
-
-  # CompactFullWriteColdDuration is the duration at which the engine
-  # will compact all TSM files in a shard if it hasn't received a
-  # write or delete
-  # compact-full-write-cold-duration = "24h"
-
-  # MaxPointsPerBlock is the maximum number of points in an encoded
-  # block in a TSM file. Larger numbers may yield better compression
-  # but could incur a performance penalty when querying
-  # max-points-per-block = 1000
+  # The amount of time that a write will wait before fsyncing.  A duration
+  # greater than 0 can be used to batch up multiple fsync calls.  This is useful for slower
+  # disks or when WAL write contention is seen.  A value of 0s fsyncs every write to the WAL.
+  # Values in the range of 0-100ms are recommended for non-SSD disks.
+  wal-fsync-delay = "100ms"
 
 ###
-### [cluster]
+### [coordinator]
 ###
-### Controls non-Raft cluster behavior, which generally includes how data is
-### shared across shards.
+### Controls the clustering service configuration.
 ###
 
-[cluster]
-  shard-writer-timeout = "5s" # The time within which a remote shard must respond to a write request.
-  write-timeout = "10s" # The time within which a write request must complete on the cluster.
-  max-concurrent-queries = 0 # The maximum number of concurrent queries that can run. 0 to disable.
-  query-timeout = "0s" # The time within a query must complete before being killed automatically. 0s to disable.
-  max-select-point = 0 # The maximum number of points to scan in a query. 0 to disable.
-  max-select-series = 0 # The maximum number of series to select in a query. 0 to disable.
-  max-select-buckets = 0 # The maximum number of buckets to select in an aggregate query. 0 to disable.
+[coordinator]
 
 ###
 ### [retention]
@@ -109,8 +30,11 @@ hostname = "{{ ansible_fqdn }}"
 ###
 
 [retention]
-  enabled = true
-  check-interval = "30m"
+  # Determines whether retention policy enforcement enabled.
+  # enabled = true
+
+  # The interval of time when retention policy enforcement checks run.
+  # check-interval = "30m"
 
 ###
 ### [shard-precreation]
@@ -121,9 +45,15 @@ hostname = "{{ ansible_fqdn }}"
 ### or partially in the past.
 
 [shard-precreation]
-  enabled = true
-  check-interval = "10m"
-  advance-period = "30m"
+  # Determines whether shard pre-creation service is enabled.
+  # enabled = true
+
+  # The interval of time when the check to pre-create new shards runs.
+  # check-interval = "10m"
+
+  # The default period ahead of the endtime of a shard group that its successor
+  # group is created.
+  # advance-period = "30m"
 
 ###
 ### Controls the system self-monitoring, statistics and diagnostics.
@@ -135,22 +65,14 @@ hostname = "{{ ansible_fqdn }}"
 ### this retention policy is configured as the default for the database.
 
 [monitor]
-  store-enabled = true # Whether to record statistics internally.
-  store-database = "_internal" # The destination database for recorded statistics
-  store-interval = "10s" # The interval at which to record statistics
+  # Whether to record statistics internally.
+  # store-enabled = true
 
-###
-### [admin]
-###
-### Controls the availability of the built-in, web-based admin interface. If HTTPS is
-### enabled for the admin interface, HTTPS must also be enabled on the [http] service.
-###
+  # The destination database for recorded statistics
+  # store-database = "_internal"
 
-[admin]
-  enabled = {{ influxdb_admin_enabled }}
-  bind-address = ":{{ influxdb_admin_port }}"
-  https-enabled = {{ influxdb_http_admin_enabled }}
-  https-certificate = "{{ influxdb_http_admin_certificate }}"
+  # The interval at which to record statistics
+  # store-interval = "10s"
 
 ###
 ### [http]
@@ -160,131 +82,109 @@ hostname = "{{ ansible_fqdn }}"
 ###
 
 [http]
+  # Determines whether HTTP endpoint is enabled.
   enabled = true
+
+  # The bind address used by the HTTP service.
   bind-address = ":{{ influxdb_http_port }}"
+
+  # Determines whether user authentication is enabled over HTTP/HTTPS.
   auth-enabled = {{ influxdb_http_auth_enabled }}
-  log-enabled = true
-  write-tracing = false
-  pprof-enabled = false
+
+  # The default realm sent back when issuing a basic auth challenge.
+  realm = "InfluxDB"
+
+  # Determines whether HTTPS is enabled.
   https-enabled = {{ influxdb_http_https_enabled }}
+
+  # The SSL certificate to use when HTTPS is enabled.
   https-certificate = "{{ influxdb_http_https_certificate }}"
-  max-row-limit = 10000
+
+  # Use a separate private key location.
+  https-private-key = "{{ influxdb_http_https_private_key }}"
+
+  # The path of the unix domain socket.
+  # bind-socket = "/var/run/influxdb.sock"
+
+  # The maximum size of a client request body, in bytes. Setting this value to 0 disables the limit.
+  # max-body-size = 25000000
 
 ###
-### [[graphite]]
+### [ifql]
 ###
-### Controls one or many listeners for Graphite data.
-###
-
-[[graphite]]
-  enabled = false
-  # database = "graphite"
-  # bind-address = ":2003"
-  # protocol = "tcp"
-  # consistency-level = "one"
-
-  # These next lines control how batching works. You should have this enabled
-  # otherwise you could get dropped metrics or poor performance. Batching
-  # will buffer points in memory if you have many coming in.
-
-  # batch-size = 5000 # will flush if this many points get buffered
-  # batch-pending = 10 # number of batches that may be pending in memory
-  # batch-timeout = "1s" # will flush at least this often even if we haven't hit buffer limit
-  # udp-read-buffer = 0 # UDP Read buffer size, 0 means OS default. UDP listener will fail if set above OS max.
-
-  ### This string joins multiple matching 'measurement' values providing more control over the final measurement name.
-  # separator = "."
-
-  ### Default tags that will be added to all metrics.  These can be overridden at the template level
-  ### or by tags extracted from metric
-  # tags = ["region=us-east", "zone=1c"]
-
-  ### Each template line requires a template pattern.  It can have an optional
-  ### filter before the template and separated by spaces.  It can also have optional extra
-  ### tags following the template.  Multiple tags should be separated by commas and no spaces
-  ### similar to the line protocol format.  There can be only one default template.
-  # templates = [
-  #   "*.app env.service.resource.measurement",
-  #   # Default template
-  #   "server.*",
-  # ]
-
-###
-### [collectd]
-###
-### Controls one or many listeners for collectd data.
+### Configures the ifql RPC API.
 ###
 
-[[collectd]]
-  enabled = false
-  # bind-address = ""
-  # database = ""
-  # typesdb = ""
+[ifql]
+  # Determines whether the RPC service is enabled.
+  # enabled = true
 
-  # These next lines control how batching works. You should have this enabled
-  # otherwise you could get dropped metrics or poor performance. Batching
-  # will buffer points in memory if you have many coming in.
+  # Determines whether additional logging is enabled.
+  # log-enabled = true
 
-  # batch-size = 1000 # will flush if this many points get buffered
-  # batch-pending = 5 # number of batches that may be pending in memory
-  # batch-timeout = "1s" # will flush at least this often even if we haven't hit buffer limit
-  # read-buffer = 0 # UDP Read buffer size, 0 means OS default. UDP listener will fail if set above OS max.
+  # The bind address used by the ifql RPC service.
+  # bind-address = ":8082"
+
 
 ###
-### [opentsdb]
+### [logging]
 ###
-### Controls one or many listeners for OpenTSDB data.
-###
-
-[[opentsdb]]
-  enabled = false
-  # bind-address = ":4242"
-  # database = "opentsdb"
-  # retention-policy = ""
-  # consistency-level = "one"
-  # tls-enabled = false
-  # certificate= ""
-  # log-point-errors = true # Log an error for every malformed point.
-
-  # These next lines control how batching works. You should have this enabled
-  # otherwise you could get dropped metrics or poor performance. Only points
-  # metrics received over the telnet protocol undergo batching.
-
-  # batch-size = 1000 # will flush if this many points get buffered
-  # batch-pending = 5 # number of batches that may be pending in memory
-  # batch-timeout = "1s" # will flush at least this often even if we haven't hit buffer limit
-
-###
-### [[udp]]
-###
-### Controls the listeners for InfluxDB line protocol data via UDP.
+### Controls how the logger emits logs to the output.
 ###
 
-[[udp]]
-  enabled = false
-  # bind-address = ""
-  # database = "udp"
-  # retention-policy = ""
+[logging]
+  # Determines which log encoder to use for logs. Available options
+  # are auto, logfmt, and json. auto will use a more a more user-friendly
+  # output format if the output terminal is a TTY, but the format is not as
+  # easily machine-readable. When the output is a non-TTY, auto will use
+  # logfmt.
+  # format = "auto"
 
-  # These next lines control how batching works. You should have this enabled
-  # otherwise you could get dropped metrics or poor performance. Batching
-  # will buffer points in memory if you have many coming in.
+  # Determines which level of logs will be emitted. The available levels
+  # are error, warn, info, and debug. Logs that are equal to or above the
+  # specified level will be emitted.
+  # level = "info"
 
-  # batch-size = 1000 # will flush if this many points get buffered
-  # batch-pending = 5 # number of batches that may be pending in memory
-  # batch-timeout = "1s" # will flush at least this often even if we haven't hit buffer limit
-  # read-buffer = 0 # UDP Read buffer size, 0 means OS default. UDP listener will fail if set above OS max.
-
-  # set the expected UDP payload size; lower values tend to yield better performance, default is max UDP size 65536
-  # udp-payload-size = 65536
+  # Suppresses the logo output that is printed when the program is started.
+  # The logo is always suppressed if STDOUT is not a TTY.
+  # suppress-logo = false
 
 ###
-### [continuous_queries]
+### [subscriber]
 ###
-### Controls how continuous queries are run within InfluxDB.
+### Controls the subscriptions, which can be used to fork a copy of all data
+### received by the InfluxDB host.
 ###
+
+[subscriber]
+  # Determines whether the subscriber service is enabled.
+  # enabled = true
+
+  # The default timeout for HTTP writes to subscribers.
+  # http-timeout = "30s"
+
+  # Allows insecure HTTPS connections to subscribers.  This is useful when testing with self-
+  # signed certificates.
+  # insecure-skip-verify = false
+
+  # The path to the PEM encoded CA certs file. If the empty string, the default system certs will be used
+  # ca-certs = ""
+
+  # The number of writer goroutines processing the write channel.
+  # write-concurrency = 40
+
+  # The number of in-flight writes buffered in the write channel.
+  # write-buffer-size = 1000
 
 [continuous_queries]
-  log-enabled = true
-  enabled = true
-  # run-interval = "1s" # interval for how often continuous queries will be checked if they need to run
+  # Determines whether the continuous query service is enabled.
+  # enabled = true
+
+  # Controls whether queries are logged when executed by the CQ service.
+  # log-enabled = true
+
+  # Controls whether queries are logged to the self-monitoring data store.
+  # query-stats-enabled = false
+
+  # interval for how often continuous queries will be checked if they need to run
+  # run-interval = "1s"

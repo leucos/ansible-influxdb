@@ -36,7 +36,7 @@ function su_wrap() {
   echo "Wrapping ${1}"
   if [ -z "${TRAVIS}" ]; then
     # Running on Vagrant
-    su vagrant -c "${1}"
+    su ubuntu -c "${1}"
   else
     eval "$1"
   fi    
@@ -46,7 +46,7 @@ function install() {
   # Check if we're running on Vagrant or Travis
   if [ -z "${TRAVIS}" ]; then
     # Running on vagrant
-    eval CI_HOME="$(printf "~%q" "vagrant")"
+    eval CI_HOME="$(printf "~%q" "ubuntu")"
     SOURCE="/vagrant"
   else
     # Running on travis

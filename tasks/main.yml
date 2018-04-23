@@ -1,1 +1,4 @@
-- include: influxdb.yml tags=influxdb
+- include: influxdb.yml
+  tags:
+    - influxdb
+
