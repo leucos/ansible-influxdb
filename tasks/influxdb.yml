@@ -1,5 +1,5 @@
 - name: Imports influxdb apt key
-  apt_key: 
+  apt_key:
     url: https://repos.influxdata.com/influxdb.key
     state: present
 
@@ -11,10 +11,17 @@
 
 - name: Installs influxdb
   apt:
-    pkg: influxdb
+    pkg: "{{ items }}"
     state: present
+  with_items:
+    - influxdb
+    - python-pip
   notify:
     - Start influxdb
+
+- name: Installs influxdb python module
+  pip:
+    name: influxdb
 
 - name: Adds influxdb configuration
   template:
