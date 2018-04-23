@@ -41,3 +41,15 @@
     login_password: "{{ influxdb_admin_password }}"
     admin: yes
   when: influxdb_admin_user is defined and influxdb_admin_password is defined
+  notify:
+    - Restart influxdb
+
+- name: Creates influxdb users
+  influxdb_user:
+    user_name: "{{ item.key }}"
+    user_password: "{{ item.value }}"
+    login_username: "{{ influxdb_admin_user }}"
+    login_password: "{{ influxdb_admin_password }}"
+    admin: yes
+  with_dict: "{{ influxdb_users }}"
+  when: influxdb_users is defined
