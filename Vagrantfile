@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision "shell",
-    :inline => "sudo apt-get install -y make python"
+    :inline => "sudo apt-get update && sudo apt-get install -y make python"
 
   config.vm.provision "shell",
     :path => "tests/specs.sh",

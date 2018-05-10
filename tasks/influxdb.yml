@@ -19,6 +19,17 @@
   notify:
     - Start influxdb
 
+- name: Ensures data dir and wal dir exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: influxdb
+    group: influxdb
+    mode: 0755
+  with_items:
+    - "{{ influxdb_datadir }}"
+    - "{{ influxdb_waldir }}"
+
 - name: Installs influxdb python module
   pip:
     name: influxdb
@@ -33,6 +44,11 @@
   notify:
     - Restart influxdb
 
+- name: Ensure InfluxDB is started
+  service:
+    name: influxdb
+    state: started
+
 - name: Creates influxdb admin user
   influxdb_user:
     user_name: "{{ influxdb_admin_user }}"
@@ -44,12 +60,32 @@
   notify:
     - Restart influxdb
 
+- name: Creates influxdb databases
+  influxdb_database:
+    database_name: "{{ item.database }}"
+    login_username: "{{ influxdb_admin_user }}"
+    login_password: "{{ influxdb_admin_password }}"
+  with_items: "{{ influxdb_users }}"
+  when: influxdb_users is defined and "database" in item
+
+- name: Adds database retention
+  influxdb_retention_policy:
+    database_name: "{{ item.database }}"
+    policy_name: "{{ item.database | default('default') }}"
+    duration: "{{ item.duration }}"
+    default: "{{ item.default | default(true) }}"
+    replication: 1
+    login_username: "{{ influxdb_admin_user }}"
+    login_password: "{{ influxdb_admin_password }}"
+  with_items: "{{ influxdb_retentions }}"
+  when: influxdb_retentions is defined
+
 - name: Creates influxdb users
   influxdb_user:
     user_name: "{{ item.username }}"
     user_password: "{{ item.password }}"
     login_username: "{{ influxdb_admin_user }}"
     login_password: "{{ influxdb_admin_password }}"
-    admin: yes
+    admin: "{{ item.admin | default(omit) }}"
   with_items: "{{ influxdb_users }}"
   when: influxdb_users is defined

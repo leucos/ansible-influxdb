@@ -4,10 +4,10 @@
 
 [data]
   # The directory where the TSM storage engine stores TSM files.
-  dir = "/data/influxdb/data"
+  dir = "{{ influxdb_datadir }}"
 
   # The directory where the TSM storage engine stores WAL files.
-  wal-dir = "/data/influxdb/snapshots"
+  wal-dir = "{{ influxdb_waldir }}"
 
   # The amount of time that a write will wait before fsyncing.  A duration
   # greater than 0 can be used to batch up multiple fsync calls.  This is useful for slower

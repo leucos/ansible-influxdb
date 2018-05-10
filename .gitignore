@@ -1,3 +1,4 @@
 .vagrant
 tests/ansible-influxdb/playbooks/
 vagrant
+*.log

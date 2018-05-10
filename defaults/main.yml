@@ -12,3 +12,7 @@ influxdb_http_https_certificate: false
 influxdb_http_https_private_key: false
 influxdb_http_port: 8086
 influxdb_http_auth_enabled: "false"
+
+# Data dir
+influxdb_datadir: /var/lib/influxdb/
+influxdb_waldir: /var/lib/influxdb/wal
