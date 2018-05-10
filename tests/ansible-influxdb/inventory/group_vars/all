@@ -1,20 +1,20 @@
-#influxdb_users:
-#  - username: foo
-#    password: foopass
-#    database: foodb
-#  - username: bar
-#    password: barpass
-#    database: bardb
-#    admin: true
-#
-#influxdb_admin_user: admin
-#influxdb_admin_password: adminpass
-#
-#
-#influxdb_retentions:
-#  - database: foodb
-#    duration: 400d
-#    default: true
-#  - database: bardb
-#    duration: INF
-#
+influxdb_users:
+  - username: foo
+    password: foopass
+    database: foodb
+  - username: bar
+    password: barpass
+    database: bardb
+    admin: true
+
+influxdb_admin_user: admin
+influxdb_admin_password: adminpass
+
+
+influxdb_retentions:
+  - database: foodb
+    duration: 400d
+    default: true
+  - database: bardb
+    duration: INF
+
