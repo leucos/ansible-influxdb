@@ -86,7 +86,7 @@
   enabled = true
 
   # The bind address used by the HTTP service.
-  bind-address = ":{{ influxdb_http_port }}"
+  bind-address = "{{ influxdb_http_ip | default('0.0.0.0') }}:{{ influxdb_http_port }}"
 
   # Determines whether user authentication is enabled over HTTP/HTTPS.
   auth-enabled = {{ influxdb_http_auth_enabled }}
