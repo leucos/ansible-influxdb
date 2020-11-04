@@ -1,6 +1,8 @@
 ansible-influxdb role
 ===============
 
+## Project has moved to https://github.com/devops-works/ansible-influxdb
+
 Installs [influxdb](https://github.com/influxdata/influxdb) on ubuntu
 14.04 and up.
 
